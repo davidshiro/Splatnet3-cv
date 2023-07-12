@@ -7,18 +7,18 @@
  
  Demo images in /images, run demo with command `python match.py --images images`
  
- #To do
- -[X] Player info recognition
-    -[ ] Assists
- -[ ] Match info recognition
+# To do
+  - [X] Player info recognition
+    - [ ] Assists
+  - [ ] Match info recognition
    - [ ] Timer
    - [ ] Score
- -[ ] Conversion to CSV
+  - [ ] Conversion to CSV
  
  Lower priority:
  
- - [ ] Normalize input
- - [ ] Create GUI
+  - [ ] Normalize input
+  - [ ] Create GUI
 
 # Credits
  Thanks to Leanny for providing weapon icons.
