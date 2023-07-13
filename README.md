@@ -2,6 +2,8 @@
  A project to take screenshots of Splatoon 3 Splatnet stats and convert them to CSV.
  
  Install requirements: `sudo pip3 install -r requirement.txt`
+
+ Install tesseract (Google's OCR engine): https://tesseract-ocr.github.io/tessdoc/Installation.html
  
  Command usage: `python match.py --images {folder where images are held}`
  
