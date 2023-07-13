@@ -130,8 +130,6 @@ class ImgToStat:
 			pt = list(splat_org)[i]
 			paint = self.resized[(pt[1]+28):(pt[1]+56), (pt[0]-95):(pt[0]-22)]
 			splats = self.resized[(pt[1]+28):(pt[1]+54),(pt[0]-9):(pt[0]+61)]
-			#paint = self.image[int(self.r*(pt[1]+28)):int(self.r*(pt[1]+56)), int(self.r*(pt[0]-95)):int(self.r*(pt[0]-22))]
-			#splats = self.image[int(self.r*(pt[1]+28)):int(self.r*(pt[1]+54)),int(self.r*(pt[0]-9)):int(self.r*(pt[0]+61))]
 			wep = self.resized[(pt[1]-4):(pt[1]+61),(self.vicXAnchor+2):(self.vicXAnchor+67)]
 			name = self.resized[(pt[1]+28):(pt[1]+54), (self.vicXAnchor+75):(self.vicXAnchor+275)]
 			pt = list(death_org)[i]

@@ -11,8 +11,8 @@
   - [X] Player info recognition
     - [ ] Assists
   - [ ] Match info recognition
-   - [ ] Timer
-   - [ ] Score
+    - [ ] Timer
+    - [ ] Score
   - [ ] Conversion to CSV
  
  Lower priority:

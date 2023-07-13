@@ -14,15 +14,15 @@ class Player:
 		print(f"Name: {self.name}")
 		self.weapon = sputil.wep_detect(weaponImg)
 		print(self.weapon)
-		self.splats = self.ocr_splat(cv2.cvtColor(splatsImg, cv2.COLOR_BGR2GRAY))
+		self.splats = self.ocr_splat(self.prepro(cv2.cvtColor(splatsImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Splats: {self.splats}")
-		self.assist_prepro(splatsImg)
-
-		self.deaths = self.ocr_splat(cv2.cvtColor(deathsImg, cv2.COLOR_BGR2GRAY))
+		self.assists = self.ocr_splat(cv2.cvtColor(self.assist_prepro(splatsImg), cv2.COLOR_BGR2GRAY))
+		print(f"Assists: {self.assists}")
+		self.deaths = self.ocr_splat(self.prepro(cv2.cvtColor(deathsImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Deaths: {self.deaths}")
-		self.specials = self.ocr_splat(cv2.cvtColor(specialsImg, cv2.COLOR_BGR2GRAY))
+		self.specials = self.ocr_splat(self.prepro(cv2.cvtColor(specialsImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Specials: {self.specials}")
-		self.paint = self.ocr_splat(cv2.cvtColor(paintImg, cv2.COLOR_BGR2GRAY))
+		self.paint = self.ocr_splat(self.prepro(cv2.cvtColor(paintImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Paint: {self.paint}")
 		#cv2.imshow("paint", self.name_prepro(paintImg))
 
@@ -51,11 +51,14 @@ class Player:
 		#invert image (for consistancy)
 		out = ~out
 		out = cv2.copyMakeBorder(out, 100, 100, 100, 100, cv2.BORDER_CONSTANT, value=[255, 255, 255])
+		#resize assist text to match
+		out = imutils.resize(out, width = int(out.shape[1] * 1.1875))
 		cv2.imshow("assist", out)
+		#print(cv2.depth(out))
+		#cv2.waitKey(0)
 		return out
 	
 	def ocr_splat(self, img):
-		pp_img = self.prepro(img)
 		digit_org = list()
 		for templatePath in glob.glob("templates/numbers/*.png"):
 			tem = cv2.imread(templatePath)
@@ -69,7 +72,7 @@ class Player:
 			#cv2.imshow("image", pp_img)
 			#cv2.waitKey(0)
 
-			res = cv2.matchTemplate(pp_img, pp_tem, cv2.TM_CCOEFF)
+			res = cv2.matchTemplate(img, pp_tem, cv2.TM_CCOEFF)
 			#(_, maxVal, _, _) = cv2.minMaxLoc(res)
 			#print(f"max value of {name} is: {maxVal}")
 
@@ -88,7 +91,7 @@ class Player:
 		#considering all found numbers, remove overlapping numbers, only keeping ones with highest correlation
 		pruned_org = sputil.non_max_suppression_fast_w_key(digit_org, temW, temH, .6)
 		#print(f"pruned: {pruned_org}")
-		drawn = pp_img.copy()
+		drawn = img.copy()
 		drawn = cv2.cvtColor(drawn, cv2.COLOR_GRAY2RGB)
 		#cv2.imshow("ocrd", drawn)
 		#cv2.waitKey(0)
@@ -96,15 +99,15 @@ class Player:
 		#parse result
 		output = ""
 		for dig in pruned_org:
-			output += dig[2].replace('n', '')
+			if dig[2] != "pn" and dig[2] != "xn": output += dig[2].replace('n', '')
 
 			#uncomment to display result on image
 			org = np.array([np.int64(dig[0][0]),np.int64(dig[0][1])])
 			#print(dig[2])
 			#print(org)
-			drawn = cv2.putText(drawn, str(dig[2].replace('n', '')), (org[0], org[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 1)
-			cv2.rectangle(drawn, org, (org[0] + temW-2, org[1] + temH-2), (0,0,255), 1)
-			cv2.imshow("ocrd", drawn)
-			cv2.waitKey(0)
+			#drawn = cv2.putText(drawn, str(dig[2].replace('n', '')), (org[0], org[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 1)
+			#cv2.rectangle(drawn, org, (org[0] + temW-2, org[1] + temH-2), (0,0,255), 1)
+			#cv2.imshow("ocrd", drawn)
+			#cv2.waitKey(0)
 		#print(f"output: {output}")
 		return output
