@@ -11,7 +11,7 @@
  
 # To do
   - [X] Player info recognition
-    - [ ] Assists
+    - [X] Assists
   - [ ] Match info recognition
     - [ ] Timer
     - [ ] Score
