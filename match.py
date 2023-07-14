@@ -25,3 +25,8 @@ for imagePath in glob.glob(args["images"] + "/*.jpg"):
 	image = cv2.imread(imagePath)
 	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"))
 
+for imagePath in glob.glob(args["images"] + "/*.png"):
+	image = cv2.imread(imagePath)
+	print(imagePath)
+	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"))
+

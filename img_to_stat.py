@@ -31,7 +31,10 @@ class ImgToStat:
 		self.primaryTem = cv2.Canny(self.primaryTem, 50, 200)
 
 		self.image = imgsrc
-		(self.r, self.vicXAnchor, self.resized) = self.calibrate_scale()
+		(self.r, self.vicXAnchor, self.vicYAnchor, self.resized) = self.calibrate_scale()
+		cv2.imwrite("resize.png", self.resized)
+		data = self.resized[(self.vicYAnchor + 993):(self.vicYAnchor + 1024),:]
+		cv2.imshow("data", data)
 		self.create_players()
 		self.disp_debug()
 
@@ -45,6 +48,7 @@ class ImgToStat:
 	def calibrate_scale(self):
 		(tH, tW) = self.primaryTem.shape[:2]
 		gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+		gray = gray[:, 0:int(gray.shape[1]/2)]
 		found = None
 		# loop over the scales of the image
 		for scale in np.linspace(0.2, 1.0, 50)[::-1]:
@@ -80,8 +84,9 @@ class ImgToStat:
 			print(f"Primary object located. {count}")
 			cv2.rectangle(rescaled, pt, (pt[0] + tW, pt[1] + tH), (0,0,255), 1)
 			rescaled = cv2.putText(rescaled, str(count), (pt[0], pt[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-			victoryAnc = pt[0]
-		return (scale, victoryAnc, resize)
+			victoryXAnc = pt[0]
+			victoryYAnc = pt[1]
+		return (scale, victoryXAnc, victoryYAnc, resize)
 
 	def create_players(self):
 		#locates splat icons
@@ -136,6 +141,7 @@ class ImgToStat:
 			deaths = self.resized[(pt[1]+27):(pt[1]+53),(pt[0]):(pt[0]+50)]
 			specials = self.resized[(pt[1]+27):(pt[1]+53),(pt[0]+45):(pt[0]+86)]
 			#cv2.imshow("playerinfo", vconcat_resize([name,wep,splats,deaths,specials,paint]))
+			#cv2.waitKey(0)
 			pl.append(Player(name, paint, splats, deaths, specials, wep))
 			#cv2.waitKey(0)
 

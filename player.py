@@ -53,7 +53,6 @@ class Player:
 		out = cv2.copyMakeBorder(out, 100, 100, 100, 100, cv2.BORDER_CONSTANT, value=[255, 255, 255])
 		#resize assist text to match
 		out = imutils.resize(out, width = int(out.shape[1] * 1.1875))
-		cv2.imshow("assist", out)
 		#print(cv2.depth(out))
 		#cv2.waitKey(0)
 		return out
