@@ -13,6 +13,8 @@
   - [X] Player info recognition
     - [X] Assists
   - [ ] Match info recognition
+    - [X] Mode
+    - [ ] Map
     - [ ] Timer
     - [ ] Score
   - [ ] Conversion to CSV
