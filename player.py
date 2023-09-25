@@ -6,6 +6,10 @@ import cv2
 
 import sputil
 
+#targeted charectars: 
+#ĄąĆćĊċČčĎďĒēĖėĘęěĚĞğĠġĢģĦħĪīĮįİıĲĳĶķАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЪЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя
+#！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［＼］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏpqrstuvwxyz｛｜｝～ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìîíïðñòóôõö÷øùúûüýāĂăÿĀ
+
 class Player:
 	def __init__(self, nameImg, paintImg, splatsImg, deathsImg, specialsImg, weaponImg) -> None:
 		nameImgRGB = cv2.cvtColor(nameImg, cv2.COLOR_BGR2RGB)
@@ -15,15 +19,15 @@ class Player:
 		print(f"Name: {self.name}")
 		self.weapon = sputil.wep_detect(weaponImg)
 		print(self.weapon)
-		self.splats = self.ocr_splat(self.prepro(cv2.cvtColor(splatsImg, cv2.COLOR_BGR2GRAY)))
+		self.splats = self.ocr_num_splat(self.prepro(cv2.cvtColor(splatsImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Splats: {self.splats}")
-		self.assists = self.ocr_splat(cv2.cvtColor(self.assist_prepro(splatsImg), cv2.COLOR_BGR2GRAY))
+		self.assists = self.ocr_num_splat(cv2.cvtColor(self.assist_prepro(splatsImg), cv2.COLOR_BGR2GRAY))
 		print(f"Assists: {self.assists}")
-		self.deaths = self.ocr_splat(self.prepro(cv2.cvtColor(deathsImg, cv2.COLOR_BGR2GRAY)))
+		self.deaths = self.ocr_num_splat(self.prepro(cv2.cvtColor(deathsImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Deaths: {self.deaths}")
-		self.specials = self.ocr_splat(self.prepro(cv2.cvtColor(specialsImg, cv2.COLOR_BGR2GRAY)))
+		self.specials = self.ocr_num_splat(self.prepro(cv2.cvtColor(specialsImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Specials: {self.specials}")
-		self.paint = self.ocr_splat(self.prepro(cv2.cvtColor(paintImg, cv2.COLOR_BGR2GRAY)))
+		self.paint = self.ocr_num_splat(self.prepro(cv2.cvtColor(paintImg, cv2.COLOR_BGR2GRAY)))
 		print(f"Paint: {self.paint}")
 		#cv2.imshow("paint", self.name_prepro(paintImg))
 
@@ -58,7 +62,7 @@ class Player:
 		#cv2.waitKey(0)
 		return out
 	
-	def ocr_splat(self, img):
+	def ocr_num_splat(self, img):
 		digit_org = list()
 		for templatePath in glob.glob("templates/numbers/*.png"):
 			tem = cv2.imread(templatePath)

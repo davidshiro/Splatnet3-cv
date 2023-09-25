@@ -27,14 +27,16 @@ class ImgToStat:
 	def __init__(self, imgsrc, pTem) -> None:
 		self.playerList = list()
 
+		#preprocess template used for resizing
 		self.primaryTem = cv2.cvtColor(pTem, cv2.COLOR_BGR2GRAY)
 		self.primaryTem = cv2.Canny(self.primaryTem, 50, 200)
 
 		self.image = imgsrc
 		(self.r, self.vicXAnchor, self.vicYAnchor, self.resized) = self.calibrate_scale()
 		cv2.imwrite("resize.png", self.resized)
-		data = self.resized[(self.vicYAnchor + 993):(self.vicYAnchor + 1024),:]
-		cv2.imshow("data", data)
+		#data = self.resized[(self.vicYAnchor + 993):(self.vicYAnchor + 1024),:]
+		#cv2.imshow("data", data)
+		self.detect_mode()
 		self.create_players()
 		self.disp_debug()
 
@@ -44,6 +46,24 @@ class ImgToStat:
 
 	def disp_resized(self):
 		cv2.imshow("base resized", self.resized)
+
+	def detect_mode(self):
+		edged = cv2.Canny(self.resized, 50, 200)
+		edged = edged[0:int(edged.shape[0]/2), :]
+		found = None
+		for templatePath in glob.glob("templates/gamemodes/*.png"):
+			tem = cv2.imread(templatePath)
+			tem = cv2.cvtColor(tem, cv2.COLOR_BGR2GRAY)
+			tem = cv2.Canny(tem, 50, 200)
+			(temH, temW) = tem.shape[:2]
+
+			res = cv2.matchTemplate(edged, tem, cv2.TM_CCOEFF)
+			(_, maxVal, _, maxLoc) = cv2.minMaxLoc(res)
+			if (found == None) or (found[0] < maxVal):
+				found = (maxVal, templatePath)
+			#print(f"{templatePath}: {maxVal}, {maxLoc}")
+		gamename = found[1].replace('templates/gamemodes\\','').replace('.png','')
+		print(f"Gamemode: {gamename}")
 
 	def calibrate_scale(self):
 		(tH, tW) = self.primaryTem.shape[:2]
@@ -91,13 +111,13 @@ class ImgToStat:
 	def create_players(self):
 		#locates splat icons
 		splat_org = list()
+		edged = cv2.Canny(self.resized, 50, 200)
 		for templatePath in glob.glob("templates/splats/*.PNG"):
 			tem = cv2.imread(templatePath)
 			tem = cv2.cvtColor(tem, cv2.COLOR_BGR2GRAY)
 			tem = cv2.Canny(tem, 50, 200)
 			(temH, temW) = tem.shape[:2]
 
-			edged = cv2.Canny(self.resized, 50, 200)
 			res = cv2.matchTemplate(edged, tem, cv2.TM_CCOEFF)
 			(_, maxVal, _, _) = cv2.minMaxLoc(res)
 
@@ -110,13 +130,13 @@ class ImgToStat:
 
 		#locates death icons
 		death_org = list()
+		edged = cv2.Canny(self.resized, 50, 200)
 		for templatePath in glob.glob("templates/deaths/*.PNG"):
 			tem = cv2.imread(templatePath)
 			tem = cv2.cvtColor(tem, cv2.COLOR_BGR2GRAY)
 			tem = cv2.Canny(tem, 50, 200)
 			(temH, temW) = tem.shape[:2]
 
-			edged = cv2.Canny(self.resized, 50, 200)
 			res = cv2.matchTemplate(edged, tem, cv2.TM_CCOEFF)
 			(_, maxVal, _, _) = cv2.minMaxLoc(res)
 
