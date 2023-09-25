@@ -2,14 +2,15 @@ import numpy as np
 import imutils
 import glob
 import cv2
-import pytesseract
+#import pytesseract # tesseract bad
 
 import sputil
 
 class Player:
 	def __init__(self, nameImg, paintImg, splatsImg, deathsImg, specialsImg, weaponImg) -> None:
 		nameImgRGB = cv2.cvtColor(nameImg, cv2.COLOR_BGR2RGB)
-		self.name = pytesseract.image_to_string(self.name_prepro(nameImgRGB))
+		#self.name = pytesseract.image_to_string(self.name_prepro(nameImgRGB))
+		self.name = "Placeholder"
 		#cv2.imshow("name", self.name_prepro(nameImgRGB))
 		print(f"Name: {self.name}")
 		self.weapon = sputil.wep_detect(weaponImg)
