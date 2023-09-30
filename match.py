@@ -4,10 +4,11 @@ import glob
 import cv2
 
 from img_to_stat import ImgToStat
+from team_detect import TeamDetector
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--images", required=True, help="Path to images where template will be matched")
+ap.add_argument("-i", "--images", required=True, help="Path to images to be read")
 args = vars(ap.parse_args())
 
 def sortByY(e):
@@ -20,10 +21,13 @@ template = cv2.Canny(template, 50, 200)
 (tH, tW) = template.shape[:2]
 #cv2.imshow("Template", template)
 
+# intialize team detector
+td = TeamDetector('rosters.csv')
+
 # loop over the images to find the template in
 for imagePath in glob.glob(args["images"] + "/*.jpg"):
 	image = cv2.imread(imagePath)
-	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"))
+	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"), td)
 
 for imagePath in glob.glob(args["images"] + "/*.png"):
 	image = cv2.imread(imagePath)

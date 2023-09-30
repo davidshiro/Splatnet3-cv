@@ -2,8 +2,9 @@ import numpy as np
 import imutils
 import glob
 import cv2
-#import pytesseract # tesseract bad
+import pytesseract 
 
+from team_detect import TeamDetector
 import sputil
 
 #targeted charectars: 
@@ -11,26 +12,42 @@ import sputil
 #！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［＼］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏpqrstuvwxyz｛｜｝～ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìîíïðñòóôõö÷øùúûüýāĂăÿĀ
 
 class Player:
-	def __init__(self, nameImg, paintImg, splatsImg, deathsImg, specialsImg, weaponImg) -> None:
+	#player class handles all ocr function
+	def __init__(self, nameImg, paintImg, splatsImg, deathsImg, specialsImg, weaponImg, teamD) -> None:
+		#use tesseract to ocr approximate name, then query against roster list
 		nameImgRGB = cv2.cvtColor(nameImg, cv2.COLOR_BGR2RGB)
-		#self.name = pytesseract.image_to_string(self.name_prepro(nameImgRGB))
-		self.name = "Placeholder"
-		#cv2.imshow("name", self.name_prepro(nameImgRGB))
-		print(f"Name: {self.name}")
+		self.td = teamD
+		self.raw_name = pytesseract.image_to_string(self.name_prepro(nameImgRGB))
+		self.name_data = self.td.name_search(self.raw_name)
+		#run weapon ocr
 		self.weapon = sputil.wep_detect(weaponImg)
-		print(self.weapon)
+		#run number ocr
 		self.splats = self.ocr_num_splat(self.prepro(cv2.cvtColor(splatsImg, cv2.COLOR_BGR2GRAY)))
-		print(f"Splats: {self.splats}")
 		self.assists = self.ocr_num_splat(cv2.cvtColor(self.assist_prepro(splatsImg), cv2.COLOR_BGR2GRAY))
-		print(f"Assists: {self.assists}")
 		self.deaths = self.ocr_num_splat(self.prepro(cv2.cvtColor(deathsImg, cv2.COLOR_BGR2GRAY)))
-		print(f"Deaths: {self.deaths}")
 		self.specials = self.ocr_num_splat(self.prepro(cv2.cvtColor(specialsImg, cv2.COLOR_BGR2GRAY)))
-		print(f"Specials: {self.specials}")
 		self.paint = self.ocr_num_splat(self.prepro(cv2.cvtColor(paintImg, cv2.COLOR_BGR2GRAY)))
-		print(f"Paint: {self.paint}")
-		#cv2.imshow("paint", self.name_prepro(paintImg))
 
+	#best guess as to what team player is on
+	def cur_team(self):
+		return self.name_data[0]
+	
+	#returns raw name data
+	def name_d(self):
+		return self.name_data
+	
+	#used when team name is confirmed
+	def confirm_team(self, team_name):
+		self.name_data = self.td.name_search_team(self.raw_name, team_name)
+
+	def display_data(self):
+		print(f"Name: {self.name_data[3]}")
+		print(self.weapon)
+		print(f"Splats: {self.splats}")
+		print(f"Assists: {self.assists}")
+		print(f"Deaths: {self.deaths}")
+		print(f"Specials: {self.specials}")
+		print(f"Paint: {self.paint}")
 
 	#preprocessing functions to make images friendlier to CV; gives control over binarization and creates a border of white pixels
 	def prepro(self, img):
@@ -68,7 +85,7 @@ class Player:
 			tem = cv2.imread(templatePath)
 			tem = cv2.cvtColor(tem, cv2.COLOR_BGR2GRAY)
 			(temH, temW) = tem.shape[:2]
-			name = templatePath.replace("templates/numbers\\",'').replace(".png",'')
+			name = templatePath.replace("templates/numbers/",'').replace(".png",'')
 			
 			ret,pp_tem = cv2.threshold(tem,120,255,cv2.THRESH_BINARY)
 
@@ -101,12 +118,14 @@ class Player:
 		#cv2.waitKey(0)
 
 		#parse result
+		if len(pruned_org) == 0:
+			return "0"
 		output = ""
 		for dig in pruned_org:
 			if dig[2] != "pn" and dig[2] != "xn": output += dig[2].replace('n', '')
 
 			#uncomment to display result on image
-			org = np.array([np.int64(dig[0][0]),np.int64(dig[0][1])])
+			#org = np.array([np.int64(dig[0][0]),np.int64(dig[0][1])])
 			#print(dig[2])
 			#print(org)
 			#drawn = cv2.putText(drawn, str(dig[2].replace('n', '')), (org[0], org[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 1)

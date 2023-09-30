@@ -2,9 +2,11 @@ import numpy as np
 import imutils
 import glob
 import cv2
+from statistics import mode
 
 import sputil
 from player import Player
+from team_detect import TeamDetector
 
 def sortByY(e):
 	return e[1]
@@ -24,7 +26,8 @@ def vconcat_resize(img_list, interpolation
     return cv2.vconcat(im_list_resize)
 
 class ImgToStat:
-	def __init__(self, imgsrc, pTem) -> None:
+	def __init__(self, imgsrc, pTem, teamD) -> None:
+		self.td = teamD
 		self.playerList = list()
 
 		#preprocess template used for resizing
@@ -38,6 +41,7 @@ class ImgToStat:
 		#cv2.imshow("data", data)
 		self.detect_mode()
 		self.create_players()
+		self.display_data()
 		self.disp_debug()
 
 	def disp_debug(self):
@@ -62,16 +66,17 @@ class ImgToStat:
 			if (found == None) or (found[0] < maxVal):
 				found = (maxVal, templatePath)
 			#print(f"{templatePath}: {maxVal}, {maxLoc}")
-		gamename = found[1].replace('templates/gamemodes\\','').replace('.png','')
-		print(f"Gamemode: {gamename}")
+		self.gamename = found[1].replace('templates/gamemodes/','').replace('.png','')
 
 	def calibrate_scale(self):
 		(tH, tW) = self.primaryTem.shape[:2]
 		gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-		gray = gray[:, 0:int(gray.shape[1]/2)]
+		gray = gray[0:int(gray.shape[0]*1/3), 0:int(gray.shape[1]*1/3)]
+		cv2.imshow("debug", gray)
+		cv2.waitKey(0)
 		found = None
 		# loop over the scales of the image
-		for scale in np.linspace(0.2, 1.0, 50)[::-1]:
+		for scale in np.linspace(0.2, 1.0, 400)[::-1]:
 			# resize the image according to the scale, and keep track
 			# of the ratio of the resizing
 			resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
@@ -101,12 +106,20 @@ class ImgToStat:
 		org = sputil.non_max_suppression_fast(org, tW, tH, .5)
 		for pt in list(org)[::-1]:
 			count += 1
-			print(f"Primary object located. {count}")
+			print(f"Primary template located. {count}")
 			cv2.rectangle(rescaled, pt, (pt[0] + tW, pt[1] + tH), (0,0,255), 1)
 			rescaled = cv2.putText(rescaled, str(count), (pt[0], pt[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 			victoryXAnc = pt[0]
 			victoryYAnc = pt[1]
 		return (scale, victoryXAnc, victoryYAnc, resize)
+
+
+	def display_data(self):
+		print(f"Winners are {self.winner}.")
+		print(f"Losers are {self.loser}.")
+		print(f"Gamemode: {self.gamename}")
+		for player in self.pl:
+			player.display_data()
 
 	def create_players(self):
 		#locates splat icons
@@ -150,19 +163,40 @@ class ImgToStat:
 		#locate data for each player
 		splat_org.sort(key=sortByY)
 		death_org.sort(key=sortByY)
-		pl = []
-		for i in range(8):
+		#define player list
+		self.pl = []
+		print(f"{len(splat_org)} players found.")
+		for i in range(len(splat_org)):
 			pt = list(splat_org)[i]
-			paint = self.resized[(pt[1]+28):(pt[1]+56), (pt[0]-95):(pt[0]-22)]
+			stats_y = pt[1]+28
+			paint = self.resized[(stats_y):(stats_y+28), (pt[0]-95):(pt[0]-22)]
 			splats = self.resized[(pt[1]+28):(pt[1]+54),(pt[0]-9):(pt[0]+61)]
 			wep = self.resized[(pt[1]-4):(pt[1]+61),(self.vicXAnchor+2):(self.vicXAnchor+67)]
 			name = self.resized[(pt[1]+28):(pt[1]+54), (self.vicXAnchor+75):(self.vicXAnchor+275)]
 			pt = list(death_org)[i]
-			deaths = self.resized[(pt[1]+27):(pt[1]+53),(pt[0]):(pt[0]+50)]
-			specials = self.resized[(pt[1]+27):(pt[1]+53),(pt[0]+45):(pt[0]+86)]
+			deaths = self.resized[(stats_y):(stats_y+28),(pt[0]):(pt[0]+50)]
+			specials = self.resized[(stats_y):(stats_y+28),(pt[0]+45):(pt[0]+86)]
 			#cv2.imshow("playerinfo", vconcat_resize([name,wep,splats,deaths,specials,paint]))
 			#cv2.waitKey(0)
-			pl.append(Player(name, paint, splats, deaths, specials, wep))
+			self.pl.append(Player(name, paint, splats, deaths, specials, wep, self.td))
 			#cv2.waitKey(0)
+		
+		# determine most likely team names by closest team name roster
+		winners = []
+		for i in range(4):
+			winners.append(self.pl[i].cur_team())
+		self.winner = mode(winners)
+		losers = []
+		for i in range(4, 8):
+			losers.append(self.pl[i].cur_team())
+		self.loser = mode(losers)
+		
+		# correct potential errors
+		for i in range(4):
+			self.pl[i].confirm_team(self.winner)
+		for i in range(4,8):
+			self.pl[i].confirm_team(self.loser)
+
+		
 
 	

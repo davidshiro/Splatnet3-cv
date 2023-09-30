@@ -1,4 +1,5 @@
 imutils==0.5.4
-numpy==1.25.0
+numpy
 opencv_python==4.7.0.72
 pytesseract==0.3.10
+openpyxl
