@@ -22,7 +22,7 @@ class TeamDetector:
         self.teamdict = {}
 
         #populate dictionary with roster names
-        with open(filename) as csvfile:
+        with open(filename, encoding="utf8") as csvfile:
             rreader = csv.DictReader(csvfile)
             for row in rreader:
                 #print(row['Team Name'])

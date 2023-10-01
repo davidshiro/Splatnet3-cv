@@ -88,7 +88,7 @@ class Player:
 			tem = cv2.imread(templatePath)
 			tem = cv2.cvtColor(tem, cv2.COLOR_BGR2GRAY)
 			(temH, temW) = tem.shape[:2]
-			name = templatePath.replace("templates/numbers/",'').replace(".png",'')
+			name = templatePath.replace("templates",'').replace(".png",'').replace("/",'').replace("\\",'').replace("numbers",'')
 			
 			ret,pp_tem = cv2.threshold(tem,120,255,cv2.THRESH_BINARY)
 

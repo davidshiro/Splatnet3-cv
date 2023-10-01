@@ -10,6 +10,7 @@ from openpyxl import load_workbook
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--images", required=True, help="Path to images to be read")
+ap.add_argument("-d", "--debug", required=False, help="Enables debug", action='store_true')
 args = vars(ap.parse_args())
 
 def sortByY(e):
@@ -48,4 +49,4 @@ for imagePath in glob.glob(args["images"] + "/*.png"):
 	for i, data in enumerate(stats.get_data()):
 		target_cell = ws.cell(row=active_row, column=i+1, value=data)
 	active_row += 1
-	wb.save("output.xlsx")
+	wb.save(args["images"] + "/output.xlsx")

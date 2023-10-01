@@ -27,7 +27,7 @@
  
  Lower priority:
  
-  - [X] Normalize input
+  - [ ] Normalize image input format
   - [ ] Create GUI
 
 # Credits

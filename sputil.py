@@ -213,7 +213,7 @@ def conv_wep_name(path):
 	wt = open("wep_name.json")
 	wep_table = json.load(wt)
 	#print(f"Converted {path} to")
-	path = path.replace("weapon_flat/Path_Wst_",'').replace(".png",'')
+	path = path.replace("weapon_flat",'').replace(".png",'').replace("Path_Wst_",'').replace("/",'').replace("\\",'')
 	result = wep_table["WeaponName_Table"][path]
 	#print(result)
 	wt.close()
