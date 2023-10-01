@@ -5,6 +5,7 @@ import cv2
 
 from img_to_stat import ImgToStat
 from team_detect import TeamDetector
+from openpyxl import load_workbook
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -24,13 +25,27 @@ template = cv2.Canny(template, 50, 200)
 # intialize team detector
 td = TeamDetector('rosters.csv')
 
+wb = load_workbook(filename = "template.xlsx")
+
+ws = wb.active
+active_row = 2
+
 # loop over the images to find the template in
 for imagePath in glob.glob(args["images"] + "/*.jpg"):
 	image = cv2.imread(imagePath)
 	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"), td)
+	# load data onto sheet
+	for i, data in enumerate(stats.get_data()):
+		target_cell = ws.cell(row=active_row, column=i+1, value=data)
+	active_row += 1
+	wb.save("output.xlsx")
 
 for imagePath in glob.glob(args["images"] + "/*.png"):
 	image = cv2.imread(imagePath)
 	print(imagePath)
-	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"))
-
+	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"), td)
+	# load data onto sheet
+	for i, data in enumerate(stats.get_data()):
+		target_cell = ws.cell(row=active_row, column=i+1, value=data)
+	active_row += 1
+	wb.save("output.xlsx")

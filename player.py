@@ -49,6 +49,9 @@ class Player:
 		print(f"Specials: {self.specials}")
 		print(f"Paint: {self.paint}")
 
+	def get_data(self):
+		return [self.name_data[3],self.weapon,self.splats,self.assists,self.deaths,self.specials,self.paint]
+
 	#preprocessing functions to make images friendlier to CV; gives control over binarization and creates a border of white pixels
 	def prepro(self, img):
 		ret,out = cv2.threshold(img,120,255,cv2.THRESH_BINARY_INV)

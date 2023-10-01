@@ -42,7 +42,13 @@ class ImgToStat:
 		self.detect_mode()
 		self.create_players()
 		self.display_data()
-		self.disp_debug()
+		#self.disp_debug()
+
+	def get_data(self):
+		output = ["?", "?", self.gamemode, self.winner, "?", self.loser, "?"]
+		for player in self.pl:
+			output.extend(player.get_data())
+		return output
 
 	def disp_debug(self):
 		cv2.imshow("debug", imutils.resize(self.image, height=800))
@@ -66,14 +72,15 @@ class ImgToStat:
 			if (found == None) or (found[0] < maxVal):
 				found = (maxVal, templatePath)
 			#print(f"{templatePath}: {maxVal}, {maxLoc}")
-		self.gamename = found[1].replace('templates/gamemodes/','').replace('.png','')
+		self.gamemode = found[1].replace('templates/gamemodes/','').replace('.png','')
 
 	def calibrate_scale(self):
 		(tH, tW) = self.primaryTem.shape[:2]
 		gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+		#trim image to section where victory template will be found
 		gray = gray[0:int(gray.shape[0]*1/3), 0:int(gray.shape[1]*1/3)]
-		cv2.imshow("debug", gray)
-		cv2.waitKey(0)
+		#cv2.imshow("debug", gray)
+		#cv2.waitKey(0)
 		found = None
 		# loop over the scales of the image
 		for scale in np.linspace(0.2, 1.0, 400)[::-1]:
@@ -117,7 +124,7 @@ class ImgToStat:
 	def display_data(self):
 		print(f"Winners are {self.winner}.")
 		print(f"Losers are {self.loser}.")
-		print(f"Gamemode: {self.gamename}")
+		print(f"Gamemode: {self.gamemode}")
 		for player in self.pl:
 			player.display_data()
 
