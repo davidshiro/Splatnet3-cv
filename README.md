@@ -1,5 +1,5 @@
-# Splatnet3-img-stat-grab
- A project to take screenshots of Splatoon 3 Splatnet stats and convert them to CSV.
+# Splatnet3-cv
+ A project to take screenshots of Splatoon 3 Splatnet stats and convert them to Excel.
  
  Install requirements: `sudo pip3 install -r requirements.txt`
 
