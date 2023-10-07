@@ -42,7 +42,7 @@ class ImgToStat:
 		self.detect_mode()
 		self.create_players()
 		self.display_data()
-		#self.disp_debug()
+		self.disp_debug()
 
 	def get_data(self):
 		output = ["?", "?", self.gamemode, self.winner, "?", self.loser, "?"]
@@ -72,7 +72,7 @@ class ImgToStat:
 			if (found == None) or (found[0] < maxVal):
 				found = (maxVal, templatePath)
 			#print(f"{templatePath}: {maxVal}, {maxLoc}")
-		self.gamemode = found[1].replace('templates/gamemodes/','').replace('.png','')
+		self.gamemode = found[1].replace('templates/gamemodes','').replace('.png','').replace("/",'').replace("\\",'')
 
 	def calibrate_scale(self):
 		(tH, tW) = self.primaryTem.shape[:2]

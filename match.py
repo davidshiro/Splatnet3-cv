@@ -39,7 +39,7 @@ for imagePath in glob.glob(args["images"] + "/*.jpg"):
 	for i, data in enumerate(stats.get_data()):
 		target_cell = ws.cell(row=active_row, column=i+1, value=data)
 	active_row += 1
-	wb.save("output.xlsx")
+	wb.save(args["images"] + "/output.xlsx")
 
 for imagePath in glob.glob(args["images"] + "/*.png"):
 	image = cv2.imread(imagePath)
@@ -50,3 +50,5 @@ for imagePath in glob.glob(args["images"] + "/*.png"):
 		target_cell = ws.cell(row=active_row, column=i+1, value=data)
 	active_row += 1
 	wb.save(args["images"] + "/output.xlsx")
+
+print("Output file to: " + args["images"] + "/output.xlsx")
