@@ -42,7 +42,7 @@ class ImgToStat:
 		self.detect_mode()
 		self.create_players()
 		self.display_data()
-		self.disp_debug()
+		#self.disp_debug()
 
 	def get_data(self):
 		output = ["?", "?", self.gamemode, self.winner, "?", self.loser, "?"]
