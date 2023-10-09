@@ -16,7 +16,7 @@ args = vars(ap.parse_args())
 def sortByY(e):
 	return e[1]
 
-# load the image image, convert it to grayscale, and detect edges
+# load the template image, convert it to grayscale, and detect edges
 template = cv2.imread("templates/victory.PNG")
 template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
 template = cv2.Canny(template, 50, 200)
@@ -37,7 +37,7 @@ for imagePath in glob.glob(args["images"] + "/*.jpg"):
 	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"), td)
 	# load data onto sheet
 	for i, data in enumerate(stats.get_data()):
-		target_cell = ws.cell(row=active_row, column=i+1, value=data)
+		target_cell = ws.cell(row=active_row, column=i+2, value=data)
 	active_row += 1
 	wb.save(args["images"] + "/output.xlsx")
 
@@ -47,7 +47,7 @@ for imagePath in glob.glob(args["images"] + "/*.png"):
 	stats = ImgToStat(image, cv2.imread("templates/victory.PNG"), td)
 	# load data onto sheet
 	for i, data in enumerate(stats.get_data()):
-		target_cell = ws.cell(row=active_row, column=i+1, value=data)
+		target_cell = ws.cell(row=active_row, column=i+2, value=data)
 	active_row += 1
 	wb.save(args["images"] + "/output.xlsx")
 
