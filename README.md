@@ -19,14 +19,15 @@
     - [X] Name-team association algorithm
   - [ ] Match info recognition
     - [X] Mode
-    - [ ] Map
+    - [X] Map
     - [ ] Timer
     - [ ] Score
   - [X] Conversion to .xlsx
-  - [ ] Rosters read from Excel
+  - [ ] Add redundant player detection
 
  Lower priority:
 
+  - [ ] Rosters read from Excel 
   - [ ] Normalize image input format
   - [ ] Create GUI
 

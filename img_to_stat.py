@@ -124,8 +124,8 @@ class ImgToStat:
 		# unpack the bookkeeping variable and compute the (x, y) coordinates
 		# of the bounding box based on the resized ratio
 		(maxVal, _, scale, res) = found
-		if scale > 1:
-			print("WARNING: Screenshot was upscaled, OCR may be less accurate")
+		if scale < 1:
+			print("!! WARNING: Screenshot was upscaled, OCR may be less accurate")
 		rescaled = imutils.resize(self.image, width = int(self.image.shape[1]/scale))
 		resize = rescaled #copy of rescale image for internal use
 		threshold = .6
@@ -199,7 +199,7 @@ class ImgToStat:
 		self.pl = []
 		print(f"{len(splat_org)} players found.")
 		if len(splat_org) != 8:
-			print("WARNING: Improper number of players found, manual entry required")
+			print("!! WARNING: Improper number of players found, manual entry required")
 		for i in range(len(splat_org)):
 			pt = list(splat_org)[i]
 			stats_y = pt[1]+28
