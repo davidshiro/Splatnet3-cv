@@ -43,7 +43,7 @@ class ImgToStat:
 		self.detect_map()
 		self.create_players()
 		self.display_data()
-		self.disp_debug()
+		#self.disp_debug()
 
 	def get_data(self):
 		output = ["?", self.map, self.gamemode, self.winner, "?", self.loser, "?"]
@@ -99,12 +99,11 @@ class ImgToStat:
 		gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
 		#trim image to section where victory template will be found
 		gray = gray[0:int(gray.shape[0]*1/3), 0:int(gray.shape[1]*1/3)]
-		cv2.imshow("debug", gray)
-		cv2.waitKey(0)
+		#cv2.imshow("debug", gray)
+		#cv2.waitKey(0)
 		found = (0, 0, 0, 0)
 		# loop over the scales of the image
-		for scale in np.geomspace(.2, 2, 400)[::-1]:
-			print(scale)
+		for scale in np.geomspace(.2, 2, 500)[::-1]:
 			# resize the image according to the scale, and keep track
 			# of the ratio of the resizing
 			resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
@@ -122,10 +121,11 @@ class ImgToStat:
 			# the bookkeeping variable
 			if found is None or maxVal > found[0]:
 				found = (maxVal, maxLoc, r, result)
-				print(f"{found[2]} = {scale}: {found[0]}")
 		# unpack the bookkeeping variable and compute the (x, y) coordinates
 		# of the bounding box based on the resized ratio
 		(maxVal, _, scale, res) = found
+		if scale > 1:
+			print("WARNING: Screenshot was upscaled, OCR may be less accurate")
 		rescaled = imutils.resize(self.image, width = int(self.image.shape[1]/scale))
 		resize = rescaled #copy of rescale image for internal use
 		threshold = .6
@@ -138,8 +138,8 @@ class ImgToStat:
 			print(f"Primary template located. {count}")
 			cv2.rectangle(rescaled, pt, (pt[0] + tW, pt[1] + tH), (0,0,255), 1)
 			rescaled = cv2.putText(rescaled, str(count), (pt[0], pt[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-			cv2.imshow("debug", rescaled)
-			cv2.waitKey(0)
+			#cv2.imshow("debug", rescaled)
+			#v2.waitKey(0)
 			victoryXAnc = pt[0]
 			victoryYAnc = pt[1]
 		return (scale, victoryXAnc, victoryYAnc, resize)
@@ -198,6 +198,8 @@ class ImgToStat:
 		#define player list
 		self.pl = []
 		print(f"{len(splat_org)} players found.")
+		if len(splat_org) != 8:
+			print("WARNING: Improper number of players found, manual entry required")
 		for i in range(len(splat_org)):
 			pt = list(splat_org)[i]
 			stats_y = pt[1]+28
