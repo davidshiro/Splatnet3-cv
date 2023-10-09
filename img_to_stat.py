@@ -40,12 +40,13 @@ class ImgToStat:
 		#data = self.resized[(self.vicYAnchor + 993):(self.vicYAnchor + 1024),:]
 		#cv2.imshow("data", data)
 		self.detect_mode()
+		self.detect_map()
 		self.create_players()
 		self.display_data()
-		#self.disp_debug()
+		self.disp_debug()
 
 	def get_data(self):
-		output = ["?", "?", self.gamemode, self.winner, "?", self.loser, "?"]
+		output = ["?", self.map, self.gamemode, self.winner, "?", self.loser, "?"]
 		for player in self.pl:
 			output.extend(player.get_data())
 		return output
@@ -58,9 +59,10 @@ class ImgToStat:
 		cv2.imshow("base resized", self.resized)
 
 	def detect_mode(self):
+		#simple template matching- finds strongest match
 		edged = cv2.Canny(self.resized, 50, 200)
-		edged = edged[0:int(edged.shape[0]/2), :]
-		found = None
+		edged = edged[0:int(edged.shape[0]/4), :]
+		found = (0, "")
 		for templatePath in glob.glob("templates/gamemodes/*.png"):
 			tem = cv2.imread(templatePath)
 			tem = cv2.cvtColor(tem, cv2.COLOR_BGR2GRAY)
@@ -74,16 +76,35 @@ class ImgToStat:
 			#print(f"{templatePath}: {maxVal}, {maxLoc}")
 		self.gamemode = found[1].replace('templates/gamemodes','').replace('.png','').replace("/",'').replace("\\",'')
 
+	def detect_map(self):
+		#simple template matching- finds strongest match
+		edged = cv2.Canny(self.resized, 50, 200)
+		edged = edged[0:int(edged.shape[0]/4), int(edged.shape[1]/4):int(edged.shape[1]*(3/4))]
+		found = (0, "")
+		for templatePath in glob.glob("templates/maps/*.png"):
+			tem = cv2.imread(templatePath)
+			tem = cv2.cvtColor(tem, cv2.COLOR_BGR2GRAY)
+			tem = cv2.Canny(tem, 50, 200)
+			(temH, temW) = tem.shape[:2]
+
+			res = cv2.matchTemplate(edged, tem, cv2.TM_CCOEFF)
+			(_, maxVal, _, maxLoc) = cv2.minMaxLoc(res)
+			if (found == None) or (found[0] < maxVal):
+				found = (maxVal, templatePath)
+			#print(f"{templatePath}: {maxVal}, {maxLoc}")
+		self.map = found[1].replace('templates/maps','').replace('.png','').replace("/",'').replace("\\",'')
+
 	def calibrate_scale(self):
 		(tH, tW) = self.primaryTem.shape[:2]
 		gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
 		#trim image to section where victory template will be found
 		gray = gray[0:int(gray.shape[0]*1/3), 0:int(gray.shape[1]*1/3)]
-		#cv2.imshow("debug", gray)
-		#cv2.waitKey(0)
-		found = None
+		cv2.imshow("debug", gray)
+		cv2.waitKey(0)
+		found = (0, 0, 0, 0)
 		# loop over the scales of the image
-		for scale in np.linspace(0.2, 1.0, 400)[::-1]:
+		for scale in np.geomspace(.2, 2, 400)[::-1]:
+			print(scale)
 			# resize the image according to the scale, and keep track
 			# of the ratio of the resizing
 			resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
@@ -101,6 +122,7 @@ class ImgToStat:
 			# the bookkeeping variable
 			if found is None or maxVal > found[0]:
 				found = (maxVal, maxLoc, r, result)
+				print(f"{found[2]} = {scale}: {found[0]}")
 		# unpack the bookkeeping variable and compute the (x, y) coordinates
 		# of the bounding box based on the resized ratio
 		(maxVal, _, scale, res) = found
@@ -116,6 +138,8 @@ class ImgToStat:
 			print(f"Primary template located. {count}")
 			cv2.rectangle(rescaled, pt, (pt[0] + tW, pt[1] + tH), (0,0,255), 1)
 			rescaled = cv2.putText(rescaled, str(count), (pt[0], pt[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+			cv2.imshow("debug", rescaled)
+			cv2.waitKey(0)
 			victoryXAnc = pt[0]
 			victoryYAnc = pt[1]
 		return (scale, victoryXAnc, victoryYAnc, resize)
@@ -125,6 +149,7 @@ class ImgToStat:
 		print(f"Winners are {self.winner}.")
 		print(f"Losers are {self.loser}.")
 		print(f"Gamemode: {self.gamemode}")
+		print(f"Map: {self.map}")
 		for player in self.pl:
 			player.display_data()
 
@@ -194,14 +219,14 @@ class ImgToStat:
 			winners.append(self.pl[i].cur_team())
 		self.winner = mode(winners)
 		losers = []
-		for i in range(4, 8):
+		for i in range(4, len(self.pl)):
 			losers.append(self.pl[i].cur_team())
 		self.loser = mode(losers)
 		
 		# correct potential errors
 		for i in range(4):
 			self.pl[i].confirm_team(self.winner)
-		for i in range(4,8):
+		for i in range(4,len(self.pl)):
 			self.pl[i].confirm_team(self.loser)
 
 		
